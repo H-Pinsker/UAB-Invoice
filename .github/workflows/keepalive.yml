@@ -1,0 +1,36 @@
+name: Supabase keep-alive
+
+# The Supabase free tier pauses a project after ~7 days without activity. This
+# scheduled job makes a tiny anonymous REST request every few days so the
+# database stays awake. It uses only the PUBLIC anon key (stored as a secret).
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *' # every 3 days at 06:17 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST endpoint
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Supabase secrets not set; skipping."
+            exit 0
+          fi
+          # A HEAD request against the REST API is enough to register activity.
+          # RLS returns no rows to the anon role, which is fine — we only need a
+          # successful round-trip to keep the project awake.
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/invoices?select=id&limit=1")
+          echo "HTTP $code"
+          # 200 (empty array) or 401/403 (RLS) all prove the project is awake.
+          if [ "$code" = "000" ]; then
+            echo "No response from Supabase"; exit 1
+          fi

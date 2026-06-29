@@ -1,0 +1,2742 @@
+/* ============================================================
+   UaB Invoice — design system
+   Brand green #0e995a · Montserrat (display) + Inter (text)
+   ============================================================ */
+
+:root {
+  --green: #0e995a;
+  --green-600: #0b7d4a;
+  --green-700: #096b40;
+  --green-tint: #e9f6ef;
+  --green-tint-2: #f3faf6;
+
+  --ink: #14241c;
+  --text: #243029;
+  --muted: #6b7c74;
+  --line: #e4ebe7;
+  --line-strong: #d3ded8;
+
+  --canvas: #eef1f0;
+  --panel: #ffffff;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow-sm: 0 1px 2px rgba(20, 36, 28, 0.06), 0 1px 3px rgba(20, 36, 28, 0.04);
+  --shadow-md: 0 6px 20px rgba(20, 36, 28, 0.1);
+  --shadow-lg: 0 24px 60px rgba(20, 36, 28, 0.22);
+
+  --font-display: 'Montserrat', 'Segoe UI', sans-serif;
+  --font-text: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  /* clip (not hidden) prevents stray horizontal page-scroll without
+     creating a scroll container, so position: sticky keeps working.
+     The line-item table keeps its own internal horizontal scroll. */
+  overflow-x: clip;
+  background: var(--canvas);
+  font-family: var(--font-text);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Flex items default to min-width:auto and won't shrink below their content.
+   Force them to 0 so a wide invoice table can never push a column (the page,
+   action bar, etc.) past the viewport width on mobile. */
+.app > * {
+  min-width: 0;
+}
+
+/* ---------- Buttons ---------- */
+button {
+  font-family: var(--font-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 9px 16px;
+  background: var(--green-tint);
+  color: var(--green-700);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, border-color 0.15s, transform 0.05s;
+}
+
+button:hover {
+  background: #dcefe3;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button.primary {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(11, 125, 74, 0.4);
+}
+
+button.primary:hover {
+  background: var(--green-600);
+}
+
+button.subtle {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line-strong);
+}
+
+button.subtle:hover {
+  background: #f3f5f4;
+  color: var(--text);
+}
+
+button.danger {
+  background: #fdecec;
+  color: #c0392b;
+}
+
+button.danger:hover {
+  background: #f9d9d9;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(1.6) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 8px;
+}
+
+.brand .brand-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.brand .brand-sub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
+
+.topbar .spacer {
+  flex: 1;
+}
+
+.flash {
+  color: var(--green-700);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ---------- Workspace ---------- */
+.workspace {
+  display: flex;
+  justify-content: center;
+  padding: 32px 18px 80px;
+  min-width: 0;
+}
+
+/* ---------- A4 sheet ---------- */
+.sheet {
+  width: 210mm;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 297mm;
+  background: var(--panel);
+  padding: 18mm 16mm;
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Inline editable inputs — clean, underline on focus */
+.sheet input,
+.sheet textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--ink);
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  padding: 3px 6px;
+  transition: background 0.12s, box-shadow 0.12s;
+}
+
+.sheet input::placeholder,
+.sheet textarea::placeholder {
+  color: #b7c2bc;
+}
+
+.sheet input:hover,
+.sheet textarea:hover {
+  background: var(--green-tint-2);
+}
+
+.sheet input:focus,
+.sheet textarea:focus {
+  outline: none;
+  background: var(--green-tint);
+  box-shadow: inset 0 0 0 1.5px rgba(14, 153, 90, 0.45);
+}
+
+.sheet input[type='date'] {
+  color: var(--ink);
+}
+
+/* Long unbreakable strings (email, website, IBAN) must never widen the sheet */
+.sheet,
+.sheet .muted-lines,
+.sheet .issuer {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* No direct child of the flex-column sheet may force horizontal overflow */
+.sheet > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ===== Header ===== */
+.inv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.uab-logo {
+  flex: none;
+}
+
+.uab-logo img {
+  display: block;
+  height: 62px;
+  width: auto;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 18px;
+}
+
+.issuer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.issuer .lines {
+  line-height: 1.45;
+}
+
+.issuer .farm {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+
+.issuer .owner {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.issuer .muted-lines {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.issuer .muted-lines span {
+  display: inline-block;
+}
+
+.issuer .muted-lines .sep {
+  margin: 0 6px;
+  color: var(--line-strong);
+}
+
+.inv-title-block {
+  text-align: right;
+  min-width: 210px;
+}
+
+.inv-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: 1px;
+  color: var(--green);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.inv-meta {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 4px 12px;
+  justify-content: end;
+  align-items: center;
+  font-size: 12px;
+}
+
+.inv-meta .k {
+  color: var(--muted);
+  text-align: right;
+}
+
+.inv-meta .v {
+  text-align: right;
+}
+
+.inv-meta input {
+  text-align: right;
+  min-width: 90px;
+}
+
+.rule {
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), #5fc593);
+  border-radius: 3px;
+  margin: 18px 0 20px;
+}
+
+/* ===== Parties / meta row ===== */
+.parties {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.block-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+
+.recipient input {
+  display: block;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.recipient-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.recipient-head .block-label {
+  margin-bottom: 0;
+}
+
+/* Small dropdown-icon button right next to the "An" heading */
+.guest-picker {
+  position: relative;
+  display: inline-flex;
+}
+
+.guest-picker-btn {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 6px;
+  background: var(--green-tint);
+  color: var(--green-700);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.guest-picker-btn:hover {
+  background: #dcefe3;
+}
+
+.guest-picker-btn svg {
+  display: block;
+}
+
+.guest-picker-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 200px;
+  max-width: 280px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 4px;
+}
+
+.guest-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.guest-picker-item:hover {
+  background: var(--green-tint);
+}
+
+.guest-picker-item .gp-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.guest-picker-item .gp-city {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* "Gast speichern" button below the recipient fields */
+.save-guest-btn {
+  margin-top: 8px;
+  align-self: flex-start;
+  font-size: 11.5px;
+  padding: 6px 12px;
+  background: var(--green-tint);
+  color: var(--green-700);
+  border: 1px solid var(--line);
+}
+
+.save-guest-btn:hover:not(:disabled) {
+  background: #dcefe3;
+}
+
+.save-guest-btn.is-saved {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+  opacity: 1;
+  animation: saveGuestPop 0.25s ease;
+}
+
+.save-guest-btn.is-saved svg {
+  animation: saveGuestCheck 0.3s ease;
+}
+
+@keyframes saveGuestPop {
+  0% {
+    transform: scale(0.94);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes saveGuestCheck {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.recipient .name input {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.salutation-select {
+  display: inline-block;
+  width: auto;
+  min-width: 120px;
+  margin-bottom: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--green-tint-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+
+.salutation-select:hover {
+  background: var(--green-tint);
+}
+
+.salutation-select:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1.5px rgba(14, 153, 90, 0.35);
+}
+
+.stay-card {
+  background: var(--green-tint-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.stay-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 10px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.stay-grid .k {
+  color: var(--muted);
+}
+
+.stay-grid input {
+  width: 100%;
+}
+
+.nights-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.nights-pill input {
+  width: 38px;
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+}
+
+.nights-pill input:hover,
+.nights-pill input:focus {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+
+/* ===== Stay range picker (Airbnb-style) ===== */
+.stay-nights {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.stay-nights .k {
+  color: var(--muted);
+}
+
+.range-picker {
+  position: relative;
+}
+
+/* Split trigger: Anreise → Abreise */
+.range-trigger {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 0;
+  padding: 0;
+  background: #fff;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  color: var(--text);
+}
+
+.range-trigger:hover {
+  background: #fff;
+  border-color: var(--green);
+}
+
+.range-trigger.open {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(14, 153, 90, 0.15);
+}
+
+.range-trigger .rt-seg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex: 1;
+  padding: 8px 12px;
+  text-align: left;
+  min-width: 0;
+}
+
+.range-trigger .rt-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 9.5px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.range-trigger .rt-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.range-trigger .rt-value.ph {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.range-trigger .rt-arrow {
+  align-self: center;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 0 2px;
+}
+
+/* Backdrop only matters on mobile (bottom sheet) */
+.range-backdrop {
+  display: none;
+}
+
+.range-pop {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 14px;
+  width: max-content;
+  max-width: min(92vw, 640px);
+}
+
+.rp-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.rp-head-spacer {
+  flex: 1;
+}
+
+.rp-nav {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 18px;
+  line-height: 1;
+  justify-content: center;
+}
+
+.rp-nav:hover {
+  background: var(--green-tint);
+  color: var(--green-700);
+}
+
+.rp-months {
+  display: flex;
+  gap: 22px;
+}
+
+.rp-month {
+  width: 252px;
+}
+
+.rp-month-title {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.rp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 36px);
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.rp-weekdays span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Calendar body is an explicit stack of week rows (no auto-flow) */
+.rp-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Each week is its own fixed 7-column grid, zero gap so range bars connect.
+   grid-auto-rows pins the row height so Safari can't inject phantom space. */
+.rp-week {
+  display: grid;
+  grid-template-columns: repeat(7, 36px);
+  grid-auto-rows: 36px;
+  justify-content: center;
+}
+
+/* Each cell is a fixed square that acts as the range-highlight layer.
+   NOTE: never make the <button> a flex/grid container — Safari ignores that
+   and miscomputes height. The day number is absolutely centered instead. */
+.rp-cell {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+
+.rp-cell.empty {
+  background: transparent;
+}
+
+.rp-cell.day {
+  position: relative;
+  cursor: pointer;
+}
+
+/* The day number lives in a centered circle that sits on top of the range bar.
+   A <span> as the flex container works reliably across all browsers. */
+.rp-cell.day .rp-day-num {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 32px;
+  height: 32px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.rp-cell.day:hover .rp-day-num {
+  background: var(--green-tint);
+}
+
+.rp-cell.is-today .rp-day-num {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Days strictly between start and end: full square tint behind the number */
+.rp-cell.is-between {
+  background: var(--green-tint);
+}
+
+/* Start / end: green circle on the number */
+.rp-cell.is-start .rp-day-num,
+.rp-cell.is-end .rp-day-num {
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+}
+
+.rp-cell.is-start:hover .rp-day-num,
+.rp-cell.is-end:hover .rp-day-num {
+  background: var(--green-600);
+}
+
+/* Connector: when a range exists, tint the half of the cap cell that faces
+   the range so the green circle blends into the in-range bar. */
+.rp-cell.is-start.has-range {
+  background: linear-gradient(to right, transparent 50%, var(--green-tint) 50%);
+}
+
+.rp-cell.is-end.has-range {
+  background: linear-gradient(to left, transparent 50%, var(--green-tint) 50%);
+}
+
+.rp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.rp-foot-info {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.rp-foot-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.rp-foot-actions button {
+  padding: 7px 14px;
+  font-size: 12.5px;
+}
+
+/* ===== Table ===== */
+.table-wrap {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  /* As a flex child of .sheet, allow shrinking below the table's
+     intrinsic width so the table scrolls INSIDE this box on mobile
+     instead of forcing the whole sheet wider than the screen. */
+  min-width: 0;
+  max-width: 100%;
+}
+
+table.items {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+table.items thead th {
+  background: var(--green);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  text-align: right;
+  padding: 9px 10px;
+  white-space: nowrap;
+}
+
+table.items thead th.left {
+  text-align: left;
+}
+
+table.items tbody td {
+  padding: 2px 6px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  vertical-align: top;
+}
+
+table.items tbody tr:nth-child(even) td {
+  background: var(--green-tint-2);
+}
+
+table.items tbody tr:hover td {
+  background: var(--green-tint);
+}
+
+table.items td.text {
+  text-align: left;
+}
+
+table.items td input {
+  width: 100%;
+  text-align: right;
+}
+
+table.items td.text input {
+  text-align: left;
+}
+
+table.items td.text textarea {
+  width: 100%;
+  text-align: left;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: block;
+}
+
+table.items td.computed {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  padding-right: 12px;
+}
+
+table.items td.actions {
+  width: 30px;
+  text-align: center;
+  border-bottom: none;
+  background: transparent !important;
+}
+
+.row-remove {
+  background: transparent;
+  color: #c0392b;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1;
+  opacity: 0;
+}
+
+table.items tbody tr:hover .row-remove {
+  opacity: 1;
+}
+
+.row-remove:hover {
+  background: #fdecec;
+}
+
+.add-row {
+  margin-top: 10px;
+}
+
+/* ===== Totals ===== */
+.totals {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.totals-box {
+  width: 290px;
+}
+
+.totals-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.totals-line .val {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.totals-grand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  padding: 12px 16px;
+  background: var(--green);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 6px 18px rgba(14, 153, 90, 0.3);
+}
+
+.totals-grand .label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.totals-grand .amount {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== UID note ===== */
+.uid-note {
+  margin-top: 14px;
+  font-size: 10.5px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ===== Payment ===== */
+.payment {
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+
+.segmented {
+  display: inline-flex;
+  background: #eef2f0;
+  border-radius: 999px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.segmented button {
+  border-radius: 999px;
+  padding: 7px 16px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  border: none;
+}
+
+.segmented button.active {
+  background: #fff;
+  color: var(--green-700);
+  box-shadow: var(--shadow-sm);
+}
+
+.transfer-note {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.bank-card {
+  margin-top: 12px;
+  display: inline-flex;
+  gap: 28px;
+  background: var(--green-tint-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+}
+
+.bank-card .k {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.bank-card .v {
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.paid-badge {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green-tint);
+  color: var(--green-700);
+  border: 1px solid #bfe6cf;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ===== Footer ===== */
+.sheet-footer {
+  margin-top: auto;
+  padding-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 10.5px;
+  border-top: 1px solid var(--line);
+}
+
+.sheet-footer .thanks {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--green);
+  font-size: 12px;
+}
+
+/* ---------- Modal ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 36, 28, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  width: 620px;
+  max-width: 100%;
+  max-height: 92vh;
+  overflow: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+.modal p.sub {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.form-grid .field-hint,
+.form-grid .field-error {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.form-grid .field-hint {
+  color: var(--muted);
+}
+.form-grid .field-error {
+  color: #c1121f;
+}
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font: inherit;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.form-grid input:focus,
+.form-grid textarea:focus,
+.form-grid select:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(14, 153, 90, 0.15);
+}
+
+/* ---------- Gäste (customers) ---------- */
+.guest-search {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font: inherit;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.guest-search:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(14, 153, 90, 0.15);
+}
+
+.guest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.guest-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 18px 20px;
+}
+
+.guest-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.guest-card-actions .spacer {
+  flex: 1;
+}
+
+.guest-empty {
+  color: var(--muted);
+  font-size: 14px;
+  padding: 28px 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* ---------- Drawer ---------- */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 380px;
+  max-width: 92vw;
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  animation: slidein 0.18s ease;
+}
+
+@keyframes slidein {
+  from {
+    transform: translateX(20px);
+    opacity: 0.6;
+  }
+}
+
+.drawer header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drawer header strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.drawer .list {
+  overflow: auto;
+  padding: 14px;
+}
+
+.invoice-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.invoice-card:hover {
+  border-color: #bfe6cf;
+  box-shadow: var(--shadow-sm);
+}
+
+.invoice-card .card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.invoice-card .num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.invoice-card .amount {
+  font-weight: 700;
+  color: var(--green-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-card .meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.invoice-card .actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.invoice-card .actions button {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 13px;
+}
+
+/* ============================================================
+   Responsive — tablet & phone
+   ============================================================ */
+
+/* Never let the page scroll sideways because of the fixed-width sheet. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ---- Tablet / narrow desktop: fluid sheet, stacked columns ---- */
+@media (max-width: 880px) {
+  .workspace {
+    padding: 18px 12px 64px;
+  }
+
+  .sheet {
+    width: 100%;
+    max-width: 210mm;
+    min-height: auto;
+    padding: 24px 20px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
+
+  /* Single-column recipient / stay area */
+  .parties {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  /* Totals box spans full width and aligns left */
+  .totals {
+    justify-content: stretch;
+  }
+
+  .totals-box {
+    width: 100%;
+  }
+
+  /* Bank details wrap instead of overflowing */
+  .bank-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 28px;
+  }
+
+  /* Wide line-item table becomes horizontally scrollable */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table.items {
+    min-width: 600px;
+  }
+}
+
+/* ---- Phone: compact toolbar, larger touch inputs ---- */
+@media (max-width: 600px) {
+  .sheet {
+    padding: 20px 16px;
+    border-radius: 8px;
+  }
+
+  /* Title + meta may wrap on very narrow screens */
+  .title-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .inv-title {
+    font-size: 24px;
+  }
+
+  .issuer .farm {
+    font-size: 17px;
+  }
+
+  /* Header logo scales down */
+  .uab-logo img {
+    height: 48px;
+  }
+
+  .totals-grand .amount {
+    font-size: 18px;
+  }
+
+  /* Bank details stack into a single column */
+  .bank-card {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  /* 16px inputs prevent iOS from auto-zooming the page on focus */
+  .sheet input,
+  .sheet textarea,
+  .salutation-select,
+  .form-grid input,
+  .form-grid textarea {
+    font-size: 16px;
+  }
+
+  /* Keep dense numeric cells legible without triggering zoom */
+  table.items td input {
+    font-size: 14px;
+  }
+
+  /* Single-column profile form */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    padding: 22px 18px;
+  }
+
+  /* ---- Date range picker becomes a bottom sheet ---- */
+  .range-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 36, 28, 0.45);
+    z-index: 59;
+  }
+
+  .range-pop {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+
+  .rp-months {
+    justify-content: center;
+  }
+
+  /* Bigger touch targets on phones */
+  .rp-weekdays,
+  .rp-week {
+    grid-template-columns: repeat(7, 40px);
+  }
+
+  .rp-week {
+    grid-auto-rows: 40px;
+  }
+
+  .rp-month {
+    width: 280px;
+  }
+
+  .rp-cell {
+    width: 40px;
+    height: 40px;
+  }
+
+  .rp-cell.day .rp-day-num {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  .topbar,
+  .drawer,
+  .modal-backdrop,
+  .add-row,
+  .row-remove,
+  .actions {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .workspace {
+    padding: 0;
+  }
+
+  .sheet {
+    box-shadow: none;
+    border-radius: 0;
+    width: auto;
+    margin: 0;
+  }
+}
+
+/* ============================================================
+   Platform shell — app bar, pages, login, overview
+   ============================================================ */
+
+/* ---------- App bar ---------- */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: saturate(1.6) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.appbar .spacer {
+  flex: 1;
+}
+
+.appbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+}
+
+.appbar-brand:hover {
+  background: transparent;
+}
+
+.appbar-brand img {
+  height: 34px;
+  width: auto;
+  display: block;
+}
+
+.appbar-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+
+.appbar-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.appbar-nav .nav {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  font-weight: 600;
+}
+
+.appbar-nav .nav:hover {
+  background: var(--green-tint-2);
+  color: var(--text);
+}
+
+.appbar-nav .nav.active {
+  background: var(--green-tint);
+  color: var(--green-700);
+}
+
+/* ---------- Pages ---------- */
+.page {
+  max-width: 1080px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 28px 22px 80px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-head h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  margin: 0;
+  font-size: 26px;
+}
+
+.page-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.toolbar-row .search {
+  flex: 1;
+  min-width: 200px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+
+.toolbar-row .search:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(14, 153, 90, 0.15);
+}
+
+.banner-error {
+  background: #fdecec;
+  color: #a02d22;
+  border: 1px solid #f3c6c1;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin: 0 auto 16px;
+  max-width: 1080px;
+  font-size: 13px;
+}
+
+/* ---------- Overview table ---------- */
+.invoice-table-wrap {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+
+table.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  min-width: 720px;
+}
+
+table.invoice-table thead th {
+  text-align: left;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+table.invoice-table th.num,
+table.invoice-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+table.invoice-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+table.invoice-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table.invoice-table tbody tr:hover td {
+  background: var(--green-tint-2);
+}
+
+table.invoice-table td.mono {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.muted-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.linklike {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.linklike:hover {
+  background: transparent;
+  color: var(--green-700);
+  text-decoration: underline;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-pill.open {
+  background: #fff4e0;
+  color: #9a6700;
+}
+
+.status-pill.open::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e0a008;
+}
+
+.status-pill.paid {
+  background: var(--green-tint);
+  color: var(--green-700);
+}
+
+.status-pill.paid::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.actions-col {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.row-actions {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+button.mini {
+  padding: 6px 11px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+/* Icon-only row action buttons (duplicate, delete) */
+button.icon-mini {
+  padding: 7px;
+  border-radius: 8px;
+  line-height: 0;
+}
+
+button.icon-mini svg {
+  display: block;
+}
+
+/* Whole row is clickable to open the invoice */
+table.invoice-table tr.row-clickable {
+  cursor: pointer;
+}
+
+table.invoice-table tr.is-selected td {
+  background: var(--green-tint) !important;
+}
+
+.cust-name {
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+/* Select column (checkboxes) */
+table.invoice-table th.select-col,
+table.invoice-table td.select-col {
+  width: 36px;
+  text-align: center;
+}
+
+table.invoice-table td.select-col input,
+.bulk-check input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+
+/* "Auswählen" toggle in the toolbar */
+.toolbar-row .subtle.active-select {
+  background: var(--green-tint);
+  color: var(--green-700);
+  border-color: var(--green);
+}
+
+/* Bulk action bar */
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+}
+
+.bulk-bar .spacer {
+  flex: 1;
+}
+
+.bulk-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.bulk-count {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------- Editor action bar ---------- */
+.editor-actionbar {
+  position: sticky;
+  top: 55px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 22px;
+  background: rgba(238, 241, 240, 0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+
+.editor-actionbar .spacer {
+  flex: 1;
+}
+
+.autosave-hint {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.icon-btn {
+  padding: 9px;
+  border-radius: 999px;
+  line-height: 0;
+}
+
+.icon-btn svg {
+  display: block;
+}
+
+/* ---------- Settings ---------- */
+.settings-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 24px 26px;
+}
+
+.settings-form h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+.settings-form p.sub {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.settings-form .modal-actions {
+  justify-content: flex-start;
+}
+
+/* ---------- Login ---------- */
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(120% 120% at 50% 0%, #f3faf6 0%, var(--canvas) 60%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 32px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-logo {
+  height: 46px;
+  width: auto;
+  align-self: center;
+  margin-bottom: 4px;
+}
+
+.login-card h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+  color: var(--ink);
+}
+
+.login-sub {
+  margin: 0 0 6px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.login-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.login-card input {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  font: inherit;
+  color: var(--ink);
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(14, 153, 90, 0.15);
+}
+
+.login-submit {
+  justify-content: center;
+  padding: 11px 16px;
+  margin-top: 4px;
+}
+
+.login-error {
+  background: #fdecec;
+  color: #a02d22;
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+.login-info {
+  background: var(--green-tint);
+  color: var(--green-700);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+.link-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 12.5px;
+  align-self: center;
+}
+
+.link-btn:hover {
+  background: transparent;
+  color: var(--green-700);
+  text-decoration: underline;
+}
+
+/* ---------- Full-screen messages ---------- */
+.fullscreen-msg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--muted);
+}
+
+.config-card {
+  max-width: 460px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 26px 28px;
+}
+
+.config-card h2 {
+  font-family: var(--font-display);
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+
+.config-card code {
+  background: var(--green-tint-2);
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-size: 12.5px;
+}
+
+/* ---------- Responsive: platform shell ---------- */
+@media (max-width: 600px) {
+  .appbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .appbar .spacer {
+    display: none;
+  }
+
+  .appbar-nav {
+    order: 3;
+    flex: 1 1 100%;
+  }
+
+  .appbar-nav .nav {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .page {
+    padding: 20px 12px 64px;
+  }
+
+  .page-head {
+    flex-direction: column;
+  }
+
+  .page-head .primary {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  .toolbar-row .segmented {
+    width: 100%;
+  }
+
+  .toolbar-row .segmented button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* ---- Overview: table becomes a stack of cards ---- */
+  .invoice-table-wrap {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  table.invoice-table {
+    min-width: 0;
+    display: block;
+  }
+
+  table.invoice-table thead {
+    display: none;
+  }
+
+  table.invoice-table tbody,
+  table.invoice-table tr,
+  table.invoice-table td {
+    display: block;
+    width: 100%;
+  }
+
+  table.invoice-table tr {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 6px 14px 12px;
+    margin-bottom: 12px;
+  }
+
+  table.invoice-table tbody tr:hover td {
+    background: transparent;
+  }
+
+  table.invoice-table td {
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 9px 0;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  /* Label each value using the data-label attribute */
+  table.invoice-table td::before {
+    content: attr(data-label);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+  }
+
+  table.invoice-table td.num {
+    text-align: right;
+  }
+
+  /* The action buttons row spans full width, no label */
+  table.invoice-table td.actions-col {
+    border-bottom: none;
+    padding-top: 12px;
+  }
+
+  table.invoice-table td.actions-col::before {
+    content: none;
+  }
+
+  .row-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .row-actions button.mini {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 10px 10px;
+    font-size: 13px;
+  }
+
+  .row-actions button.icon-mini {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+  }
+
+  /* On mobile cards, show the select checkbox as a labelled row */
+  table.invoice-table td.select-col {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  table.invoice-table td.select-col::before {
+    content: 'Auswählen';
+  }
+
+  .bulk-bar {
+    flex-wrap: wrap;
+    gap: 10px 16px;
+  }
+
+  .bulk-bar .danger {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  /* ---- Editor action bar ---- */
+  .editor-actionbar {
+    top: 0;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+  }
+
+  /* Avoid double horizontal padding (page + workspace) so the sheet is wider */
+  .page.editor {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .page.editor .workspace {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .editor-actionbar .primary {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .editor-actionbar .icon-btn {
+    flex: 0 0 auto;
+  }
+
+  /* ---- Login fills small screens comfortably ---- */
+  .login-card {
+    padding: 26px 20px;
+  }
+
+  .login-card input {
+    font-size: 16px; /* prevent iOS zoom */
+  }
+
+  /* ---- Settings ---- */
+  .settings-card {
+    padding: 18px 16px;
+  }
+}
+
+/* ===========================================================================
+   Eurowork "Quartierbestätigung"
+   =========================================================================== */
+
+/* --- List of saved sheets --- */
+.ew-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.ew-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+}
+.ew-card:hover {
+  border-color: var(--green);
+  box-shadow: 0 4px 14px rgba(14, 153, 90, 0.1);
+}
+.ew-card:active {
+  transform: translateY(1px);
+}
+.ew-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.ew-card-month {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
+}
+.ew-card-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+.ew-card-quartier {
+  font-size: 13px;
+  color: var(--green-700);
+}
+.ew-card-del {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--muted);
+}
+.ew-card-del:hover {
+  background: #fdecec;
+  color: #c1121f;
+}
+
+/* --- Editor toolbar --- */
+.eurowork-editor .ew-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.eurowork-editor .ew-toolbar .primary,
+.eurowork-editor .ew-toolbar .subtle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.save-ew.is-saved {
+  color: var(--green-700);
+  border-color: #bfe6cf;
+  background: var(--green-tint);
+}
+
+/* --- The A4-landscape sheet --- */
+.ew-sheet-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.ew-sheet {
+  background: #fff;
+  color: #111;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 26px 30px;
+  min-width: 900px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.ew-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+.ew-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  color: #111;
+}
+.ew-attention {
+  display: inline-block;
+  margin-top: 5px;
+  background: #fff27a;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 1px 5px;
+}
+.ew-bill {
+  max-width: 56%;
+}
+.ew-bill-label {
+  font-weight: 700;
+  color: #111;
+}
+.ew-bill-name {
+  font-weight: 700;
+  color: #c1121f;
+}
+.ew-bill-addr {
+  color: #c1121f;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.ew-bill-contact {
+  margin-top: 2px;
+  color: #1a1a1a;
+}
+
+.ew-intro {
+  font-weight: 700;
+  margin-top: 14px;
+}
+.ew-notes {
+  margin-top: 4px;
+}
+.ew-note {
+  display: flex;
+  gap: 6px;
+  margin-top: 3px;
+}
+.ew-note-num {
+  font-weight: 700;
+  flex: none;
+  width: 16px;
+}
+.ew-note-plain {
+  font-weight: 700;
+  margin-top: 4px;
+  margin-left: 22px;
+}
+
+/* --- Quartier fields --- */
+.ew-fields {
+  display: flex;
+  gap: 40px;
+  margin-top: 14px;
+}
+.ew-fields-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.ew-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ew-field-label {
+  font-weight: 700;
+  flex: none;
+  width: 150px;
+}
+.ew-field-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-bottom: 1px solid #111;
+  background: transparent;
+  font: inherit;
+  padding: 2px 2px 3px;
+  color: #111;
+}
+.ew-field-input:focus {
+  outline: none;
+  border-bottom-color: var(--green);
+  background: var(--green-tint-2);
+}
+
+/* --- Month --- */
+.ew-month {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  border: 1.5px solid #111;
+  padding: 5px 10px;
+}
+.ew-month-label {
+  font-weight: 700;
+  font-size: 14px;
+}
+.ew-month-select {
+  font: inherit;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: #fff;
+}
+
+/* --- Day grid --- */
+.ew-grid-scroll {
+  overflow-x: auto;
+  margin-top: 4px;
+  -webkit-overflow-scrolling: touch;
+  /* Always show a scrollbar so touch users know the grid scrolls sideways. */
+  scrollbar-width: thin;
+}
+.ew-grid-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+.ew-grid-scroll::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 6px;
+}
+.ew-grid-scroll::-webkit-scrollbar-track {
+  background: var(--green-tint-2);
+}
+table.ew-grid {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  user-select: none;
+}
+table.ew-grid.is-dragging {
+  cursor: cell;
+}
+.ew-grid th,
+.ew-grid td {
+  border: 1px solid #111;
+  text-align: center;
+  font-size: 12px;
+}
+.ew-grid thead th {
+  font-weight: 700;
+  background: #fff;
+  padding: 3px 2px;
+}
+.ew-col-zi {
+  width: 46px;
+}
+.ew-col-name {
+  width: 170px;
+  text-align: left;
+}
+.ew-col-day {
+  width: 26px;
+  padding: 0;
+}
+.ew-col-total {
+  width: 52px;
+}
+.ew-col-x {
+  width: 28px;
+  border: none !important;
+}
+.ew-col-day.is-disabled,
+.ew-day.is-disabled {
+  background: #eceef0;
+}
+
+.ew-cell-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font: inherit;
+  padding: 4px 4px;
+  color: #111;
+}
+.ew-name-input {
+  font-weight: 700;
+}
+.ew-cell-input:focus {
+  outline: none;
+  background: var(--green-tint-2);
+}
+
+.ew-day {
+  height: 30px;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--green-700);
+  cursor: pointer;
+  /* Default: allow vertical+horizontal panning so swipes scroll the grid. */
+  touch-action: auto;
+}
+.ew-grid.select-mode .ew-day {
+  /* Range-paint mode: capture the gesture for dragging instead of scrolling. */
+  touch-action: none;
+}
+.ew-day.is-on {
+  background: var(--green-tint);
+}
+.ew-day:not(.is-disabled):hover {
+  background: var(--green-tint-2);
+}
+.ew-total-cell {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.ew-row-del {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.ew-row-del:hover {
+  background: #fdecec;
+  color: #c1121f;
+}
+
+.ew-grid-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.ew-grand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid #111;
+  padding: 5px 12px;
+  font-size: 14px;
+}
+.ew-grand strong {
+  font-size: 16px;
+}
+.ew-select-toggle.is-on {
+  background: var(--green-tint);
+  color: var(--green-700);
+  border-color: #bfe6cf;
+}
+.ew-grid-hint {
+  margin: 6px 2px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* --- Footer --- */
+.ew-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 26px;
+}
+.ew-foot-greet {
+  font-weight: 700;
+  color: #111;
+}
+.ew-foot-company {
+  font-weight: 700;
+  color: #c1121f;
+  margin-top: 2px;
+}
+.ew-sig {
+  text-align: center;
+}
+.ew-sig-line {
+  width: 200px;
+  border-top: 1.5px solid #111;
+  margin-bottom: 4px;
+}
+.ew-sig-text {
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .ew-sheet {
+    padding: 18px 16px;
+  }
+  .ew-title {
+    font-size: 22px;
+  }
+  .ew-fields {
+    gap: 18px;
+  }
+  .ew-field-label {
+    width: 120px;
+  }
+}
+
+
+
