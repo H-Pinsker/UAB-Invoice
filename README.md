@@ -1,3 +1,3 @@
 # UaB Invoice
 
-Private invoicing web app.
+Web app.
